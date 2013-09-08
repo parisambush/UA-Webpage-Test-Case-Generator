@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<script type="text/javascript">
+// Script for testing if all 146 vectors of ROW pages in CAT correctly stage
+var row8oc123 = ["RU","AR","C2","HK","IL","MX","TH","TR","TW","AD","AE","AG","AI","AL","AM","AN","AO","AW","AZ","BA","BB","BF","BH","BI","BJ","BM","BN","BO","BS","BT","BW","BZ","CD","CG","CK","CL","CO","CR","CV","DJ","DM","DO","DZ","EC","ER","ET","FJ","FK","FM","FO","GA","GD","GL","GM","GN","GT","GW","GY","HN","HR","ID","IN","IS","JM","JO","KE","KG","KH","KI","KM","KN","KR","KW","KY","KZ","LA","LC","LK","LS","MA","MG","MH","ML","MN","MR","MS","MU","MV","MW","MY","MZ","NA","NC","NE","NF","NI","NP","NR","NU","NZ","OM","PA","PE","PF","PG","PH","PM","PN","PW","QA","RW","SA","SB","SC","SH","SJ","SL","SN","SO","SR","ST","SV","SZ","TC","TD","TG","TJ","TM","TN","TO","TT","TV","TZ","UA","UG","UY","VC","VE","VG","VN","VU","WF","WS","YE","ZA","ZM"];
+var eu = ["BG","CY","CZ","EE","UK","GI","GR","HU","IE","LI","LT","LV","MT","RO","SI","SK","SM"];
+
+var countries;
+var i;
+var j;
+var urls = new Array();
+var url_base = "https://cms.paypal.com/";
+var url_suffix = "/cgi-bin/?cmd=_render-content&content_ID=ua/upcoming_policies_full&locale.x=en_US";
+
+function tempRowTester() {
+    for (i = 0; i < row8oc123.length; i++) {
+        if (row8oc123[i] == "TH" || row8oc123[i] == "HK") {
+            urls[i] = url_base + row8oc123[i].toLowerCase() + url_suffix.replace("en_US", "en_GB");
+        } else {
+            urls[i] = url_base + row8oc123[i].toLowerCase() + url_suffix;
+        }
+    }
+}
+
+function tempEuTester() {
+    for (i = 0; i < eu.length; i++) {
+        urls[i] = url_base + eu[i].toLowerCase() + url_suffix;
+    }
+}
+
+function testPages(){
+    for (i = 0; i < urls.length; i++){
+        document.getElementById("text").innerHTML += urls[i] + '<br />';
+    }
+    //alert("Count is: " + i);
+}
+
+function setupCountries(){
+    var input = document.getElementById("list").innerHTML;
+    // Checks if list is not comma separated or has wrong pattern
+    var patt1 = /[A-z][A-z][,]/g;
+    var patt2 = /[A-z][A-z][ ]*/;
+    if (patt1.test(input) == false && patt2.test(input) == false) {
+        alert("Please make sure your contry list is comma separated (eg. AR, C2, HK)");
+        return 0;
+    } else {
+        input = input.replace("<br>", "");
+        input = input.replace(" ", "");
+        countries = input.split(",");
+
+        for (i = 0; i < countries.length; i++) {
+            urls[i] = url_base + countries[i].toLowerCase() + url_suffix;
+        }
+    }
+}
+
+function genScript() {
+    // Process countries list
+    //setupCountries();
+    //tempRowTester();
+    tempEuTester();
+    
+    // Split test code into 3 sections
+    var code = document.getElementById("text").innerHTML;
+    var index1 = 0;
+    var index2 = code.indexOf("&lt;tbody&gt;") + 13;
+    var block1 = code.substring(index1, index2);
+
+    index1 = index2;
+    index2 = code.lastIndexOf("&lt;/tr&gt;") + 11;
+    var block2 = code.substring(index1, index2);
+
+    // Find the "open" tag in block 2
+    var t = block2.indexOf("&lt;td&gt;open&lt;/td&gt;");
+    if (t == -1) {
+        alert("Please make sure there is an 'open' command in your selenium test case");
+        return 0;
+    }
+        
+    // Here, we create multiple
+    var new_block2 = "";        
+    
+    for (i = 0; i < urls.length; i++){
+        block2 = block2.split("<br>");
+        for (j = 0; j < block2.length; j++) {
+                // find the 2nd <td> tag in this array
+                if (block2[j].search("&lt;td&gt;open&lt;/td&gt;") >= 0 && j <= block2.length - 2) {
+                        j++;
+                        if (block2[j].search("&lt;td&gt;")) {
+                                // replace the 2nd <td> tag under the open command to the right url
+                                block2[j] = "&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&gt;" + urls[i] + "&lt;/td&gt;";                                
+                                block2 = block2.join("<br>");
+                                new_block2 += block2;
+                                j = block2.length;
+                        }
+                }
+                
+        }
+    }
+    block2 = new_block2;
+    
+    //Now we get block 3
+    index1 = code.indexOf("&lt;/tbody&gt;");
+    index2 = code.length;
+    var block3 = code.substring(index1, index2);
+
+    //Now join blocks 1, 2, and 3 together
+    var final_code = block1 + block2 + block3;    
+    
+    document.getElementById("text").innerHTML = final_code;    
+}
+</script>
+</haed>
+
+<body>
+<h1 style="color: #C68038;"><strong>UA Agreements Team Multi-Page Selenium Test Case Generator</strong></h1>
+<div>
+<p id="list" style="border: 2px solid black; width: 75%; padding: 1;" id="text" contenteditable="true">INSERT COMMA-SEPARATED PAGE LIST HERE</p>
+</div>
+<div>
+<p style="border: 2px solid black; width: 75%; padding: 1;" id="text" contenteditable="true">INSERT SELENIUM TEST CASE CODE HERE
+</p>
+
+<button onclick="genScript()">Generate Code</button>
+</div>
+</body>
+</html>
