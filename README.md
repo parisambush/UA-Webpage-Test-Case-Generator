@@ -11,9 +11,12 @@ R002:
 - Added radio button selectors for country sets.
 
 R003:
-- Finished implementing the radio selectors so users can choose from preset country sets or create their own.
+- Users can now choose from preset country sets or create their own.
 - Added country set for SENE, Nordics, and EUSO group.
 - Some cleanup of page styling and code cleanup
+
+R004:
+- Users can now choose from stage or live domains of SR2 or CAT CMS.
 
 Usage:
 Coming soon!
