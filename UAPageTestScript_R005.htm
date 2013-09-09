@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<style>
+h1
+{
+     color: #C68038;
+}
+
+#list, #code, #page
+{
+    border: 2px solid black; 
+    width: 75%;
+    min-height: 30px;
+    padding: 1; 
+}
+
+</style>
+<script type="text/javascript">
+
+// Country Sets
+var ROW8OC123 = ["AR","C2","HK","IL","MX","TH","TR","TW","AD","AE","AG","AI","AL","AM","AN","AO","AW","AZ","BA","BB","BF","BH","BI","BJ","BM","BN","BO","BS","BT","BW","BZ","CD","CG","CK","CL","CO","CR","CV","DJ","DM","DO","DZ","EC","EG","ER","ET","FJ","FK","FM","FO","GA","GD","GE","GL","GM","GN","GT","GW","GY","HN","HR","ID","IN","IS","JM","JO","KE","KG","KH","KI","KM","KN","KR","KW","KY","KZ","LA","LC","LK","LS","MA","MG","MH","ML","MN","MR","MS","MU","MV","MW","MY","MZ","NA","NC","NE","NF","NI","NP","NR","NU","NZ","OM","PA","PE","PF","PG","PH","PM","PN","PW","QA","RS","RW","SA","SB","SC","SG","SH","SJ","SL","SN","SO","SR","ST","SV","SZ","TC","TD","TG","TJ","TM","TN","TO","TT","TV","TZ","UA","UG","UY","VC","VE","VG","VN","VU","WF","WS","YE","ZA","ZM"];
+var UKROE = ["BG","CY","CZ","EE","UK","GI","GR","HU","IE","LI","LT","LV","MT","RO","SI","SK","SM"];
+var SENE_NORD_EUSO = ["AT","DE","CH","DK","SE","NO","BE","ES","FR","MQ","RE","GF","GP","YT","IT","NL","PL","FI","LU","PT","VA"];
+
+// Domain Sets
+var SR2_STAGE = {"base": "https://www.stage2p1541.qa.paypal.com/", "suffix": "/cgi-bin/marketingweb?cmd=_render-content&content_ID=ua/"};
+var CAT_STAGE = {"base": "https://www.stage2p1396.qa.paypal.com/", "suffix": "/webapps/mpp/preview/ua/"};
+var SR2_LIVE = {"base": "https://cms.paypal.com/", "suffix": "/cgi-bin/marketingweb?cmd=_render-content&content_ID=ua/"};
+var CAT_LIVE = {"base": "https://www.paypal.com/", "suffix": "/webapps/mpp/ua/"};
+
+var e_flag = false;
+
+/*
+if(window.addEventListener) {
+        document.getElementById("row8oc123").addEventListener('select', hideList, true); // Firefox
+    } else if (window.attachEvent) {
+        //opts[i].attachEvent('onclick', selectCountry); // IE
+    } else //opts[i].onclick = selectCountry;
+}*/
+
+/*
+function hideList() {
+    //document.getElementById("list").;
+    alert("hideList");
+}*/
+
+function urlMaker(c_set, d_set, page) {
+    var urls = new Array();
+    var en_us = "&locale.x=en_US";
+    var en_gb = "&locale.x=en_GB";
+
+    // Use locale en_GB for TH and HK countries, en_US for the rest.
+    for (var i = 0; i < c_set.length; i++) {
+        if (c_set[i].toLowerCase() == "th" || c_set[i].toLowerCase() == "hk") {
+            urls[i] = d_set.base + c_set[i].toLowerCase() + d_set.suffix + page + en_gb;
+        } else {
+            urls[i] = d_set.base + c_set[i].toLowerCase() + d_set.suffix + page + en_us;
+        }
+    }
+    return urls;
+}
+
+function custom(d_set, page){
+    var countries = new Array();
+    var urls = new Array();
+    var input = document.getElementById("list").innerHTML;
+    var en_us = "&locale.x=en_US";
+    var en_gb = "&locale.x=en_GB";
+    
+    // Checks if list is not comma separated or has wrong pattern.
+    var patt1 = /[A-z][A-z][,]/g;
+    var patt2 = /[A-z][A-z]/g;
+    
+    // Santiize input
+    input = input.replace(/&nbsp;/g, "");
+    input = input.replace(/<br>/g, "");
+    input = input.replace(/ /g, "");
+    input = input.trim();
+    document.getElementById("list").innerHTML = input;
+
+    if (patt1.test(input) == false || patt2.test(input) == false) {
+        alert("Please make sure your contry list is composed of comma separated two-letter countries (eg. AR, C2, HK)");
+        e_flag = true;
+        return 1;
+    } else {
+        countries = input.split(",");
+        // Use locale en_GB for TH and HK countries, en_US for the rest.
+        for (var i = 0; i < countries.length; i++) {
+            if (countries[i].toLowerCase() == "th" || countries[i].toLowerCase() == "hk") {
+                urls[i] = d_set.base + countries[i].toLowerCase() + d_set.suffix + page + en_gb;
+            } else {
+                urls[i] = d_set.base + countries[i].toLowerCase() + d_set.suffix + page + en_us;
+            }
+        }
+        return urls;
+    }
+}
+
+function genScript() {
+    var c_set;
+    var d_set;
+    var page;
+    var urls;
+
+    // Choose between presets or custom country list
+
+    // Find out what was checked in the country set radio button list
+    var c_select_list = document.getElementById("c_select");
+    var c_value = (function() {
+            for (var i = 0; i < c_select_list.length; i++) {
+                if (c_select_list[i].checked) {
+                    return c_select_list[i].value;
+                }
+            }
+    })();
+    
+    
+    // Check if a country set or custom list was actually selected. If so, determine which one and save a reference to it.
+    if (c_value == null) {
+        alert("Please select a country set or create a custom one above.");
+        return 1;
+    } else { 
+        switch (c_value) {
+            case "row8oc123":
+                c_set = ROW8OC123;
+                break;
+            case "ukroe":
+                c_set = UKROE;
+                break;
+            case "sene_nord_euso":
+                c_set = SENE_NORD_EUSO;
+                break;
+            case "custom":
+                break;
+            default:
+                break;
+        }
+    }
+    
+    // Choose the domain set based on the user's choice.
+    var d_select_list = document.getElementById("d_select");
+    var d_value = (function() {
+            for (var i = 0; i < d_select_list.length; i++) {
+                if (d_select_list[i].checked) {
+                    return d_select_list[i].value;
+                }
+            }
+    })();
+
+    // Check if a domain was selected. If so, determine which one and save a reference to one of the domain sets.
+    if (d_value == null) {
+        alert("Please select the domain you want to test on.");
+        return 1;
+    } else { 
+        switch (d_value) {
+            case "sr2_stage":
+                d_set = SR2_STAGE;
+                break;
+            case "sr2_live":
+                d_set = SR2_LIVE;
+                break;
+            case "cat_stage":
+                d_set = CAT_STAGE;
+                break;
+            case "cat_live":
+                d_set = CAT_LIVE;
+                break;
+            default:
+                break;
+        }
+    }        
+    
+    // Get page name user has entered. Return an error if field is blank.
+    if (document.getElementById("page").innerHTML == null) {
+        alert("Please input the name of the page you want to test on.");
+        return 1;
+    } else {
+        page = document.getElementById("page").innerHTML.trim();
+        page = page.replace(/<br>/g, "");
+        page = page.replace(/&nbsp;/g, "");
+    }
+
+    // Do not contunue with script if an input error is encountered
+    if (e_flag) {
+        document.getElementById("code").innerHTML = "";
+        return 1;
+    }   
+    
+    // With all parameters set, call either the custom function or urlMaker function to construct the URLs
+    if (c_value == "custom") {
+        urls = custom(d_set, page);  
+    } else {
+        urls = urlMaker(c_set, d_set, page);
+    }
+
+    // Split test code into 3 separate blocks. Block 2 is the part that will be repeated for however many countries there are.
+    var code = document.getElementById("code").innerHTML;
+    var index1 = 0;
+    var index2 = code.indexOf("&lt;tbody&gt;") + 13;
+    var block1 = code.substring(index1, index2);
+
+    index1 = index2;
+    index2 = code.lastIndexOf("&lt;/tr&gt;") + 11;
+    var block2 = code.substring(index1, index2);
+
+    // Find the "open" tag in block 2
+    var t = block2.indexOf("&lt;td&gt;open&lt;/td&gt;");
+    if (t == -1) {
+        alert("Please make sure there is an 'open' command in your selenium test case");
+        return 1;
+    }
+        
+    // Here, we create multiple versions of block 2, which consists of the actual test cases.
+    var new_block2 = "";        
+    
+    for (var i = 0; i < urls.length; i++){
+        block2 = block2.split("<br>");
+        for (var j = 0; j < block2.length; j++) {
+                // find the 2nd <td> tag in this array
+                if (block2[j].search("&lt;td&gt;open&lt;/td&gt;") >= 0 && j <= block2.length - 2) {
+                        j++;
+                        if (block2[j].search("&lt;td&gt;")) {
+                                // replace the 2nd <td> tag under the open command to the right url
+                                block2[j] = "&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&gt;" + urls[i] + "&lt;/td&gt;";                                
+                                block2 = block2.join("<br>");
+                                new_block2 += block2;
+                                j = block2.length;
+                        }
+                }
+                
+        }
+    }
+    block2 = new_block2;
+    
+    //Now we get block 3
+    index1 = code.indexOf("&lt;/tbody&gt;");
+    index2 = code.length;
+    var block3 = code.substring(index1, index2);
+
+    //Now join blocks 1, 2, and 3 together
+    var final_code = block1 + block2 + block3;    
+    
+    document.getElementById("code").innerHTML = final_code;    
+}
+</script>
+</haed>
+<body>
+
+<h1><strong>UA Webpage Test Case Generator for English-Source Countries</strong></h1>
+<div>
+<p><u>Please select the country set you want to test on:</u></p>
+<form id="c_select">
+<input type="radio" name="select" value="row8oc123">ROW Other Countries + Localized ROW (AR, C2, HK, IL, MX, TH, TR, TW)<br />
+<input type="radio" name="select" value="ukroe">UK + ROE<br />
+<input type="radio" name="select" value="sene_nord_euso">SENE, Nordics, EUSO, and AT, DE, CH<br />
+<input type="radio" name="select" value="custom">Custom List<br />
+</form>
+<p>Insert comma-separated country list here (eg. AR,C2,HK)<p/>
+<p id="list" contenteditable="true"></p>
+<p>&nbsp;</p>
+</div>
+
+<div>
+<p><u>Please select the domain you want to test on.</u></p>
+<form id="d_select">
+<input type="radio" name="select" value="sr2_stage">SR2 Stage<br />
+<input type="radio" name="select" value="sr2_live">SR2 Live<br />
+<input type="radio" name="select" value="cat_stage">CAT Stage<br />
+<input type="radio" name="select" value="cat_live">CAT Live<br />
+</form>
+</div>
+
+<div>
+<p><u>Please input the name of the page you want to test on. Do not include any locale parameters (eg. UserAgreement_full).</u></p>
+<p id="page" contenteditable="true"></p>
+<p>&nbsp;</p>
+</div>
+
+<div>
+<p>Insert Selenium IDE test code here.<p/>
+<p id="code" contenteditable="true">
+</p>
+
+<button onclick="genScript()">Generate Code</button>
+</div>
+</body>
+
+</html>

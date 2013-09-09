@@ -13,13 +13,21 @@ R002:
 R003:
 - Users can now choose from preset country sets or create their own.
 - Added country set for SENE, Nordics, and EUSO group.
-- Some cleanup of page styling and code cleanup
+- Some cleanup of page styling and code cleanup.
 
 R004:
 - Users can now choose from stage or live domains of SR2 or CAT CMS.
 
+R005:
+- Users can now input the page name they want to test on.
+- Appended English locales to all created URLs.
+
 Usage:
-Coming soon!
+1 - Download the Selenium IDE plugin in Firefox through Firefox addons (Ctrl+Shift+A). Then open up both the Selenium IDE addon and the UA Webpage Test Case Generator.
+2 - Create your test case in Selenium IDE. Make sure your test case has just one open tag in it. This tag will be modified with generated URLs based on what you choose.
+3 - Click on the source tab in Selenium IDE and copy and paste the code in the filed which says "Insert Selenium IDE test code here".
+4 - Set your parameters for country set, domain set, and page name in their respective fields. Once done, click the "Generate Code" button at the bottom of the screen.
+5 - The code for your test cases will be generated in the code field. Copy this code back into the source under the "source" tab in Selenium IDE. You can now run you test cases for all the country versions of the page you specified.
 
 System Requirements:
-To use this app, you must have a current version of Firefox with the Selenium IDE add on installed.
+To use this app, you must have a current version of Firefox with the Selenium IDE add on installed. You must have JavaScript enabled.
